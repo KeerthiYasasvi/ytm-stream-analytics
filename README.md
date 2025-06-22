@@ -59,9 +59,13 @@ YouTube Music Simulator ──▶ Kafka (listening_events → listening_events_e
    
    OPENAI_API_KEY=sk-your-key-here
 
-4. **Place** your YouTube Music auth:
+3. **Generate** your YouTube Music auth file:
    
-   simulator/browser.json
+   ```bash
+   # In a browser session, follow the ytmusicapi guide:
+   #   https://github.com/sigma67/ytmusicapi#setup
+   # or simply:
+   python simulator/setup_browser.py
 
 ## Running the Pipeline
 

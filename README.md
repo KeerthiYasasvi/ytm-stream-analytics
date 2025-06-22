@@ -55,11 +55,11 @@ YouTube Music Simulator ──▶ Kafka (listening_events → listening_events_e
    cd ytm-stream-analytics
 
 2. **Create** a .env in the project root:
-   # Kafka
+   ### Kafka
    KAFKA_BROKER_ADDRESS=kafka
    KAFKA_BROKER_PORT=9092
 
-   # OpenAI
+   ### OpenAI
    OPENAI_API_KEY=sk-your-key-here
 
 3. **Place** your YouTube Music auth:

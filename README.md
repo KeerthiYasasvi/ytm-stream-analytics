@@ -29,3 +29,27 @@ YouTube Music Simulator ──▶ Kafka (listening_events → listening_events_e
 ```
 
 ---
+
+
+1. **Simulator**: Polls your YouTube Music history via `ytmusicapi`, publishes raw listen events to Kafka.  
+2. **Enricher**: A light container that reads raw events, adds metadata (duration, release date), writes to `listening_events_enriched`.  
+3. **Spark Streaming**: Reads the enriched topic, writes every event to Parquet for analytics.  
+4. **Recommender**: Reads enriched events in batches, calls OpenAI ChatGPT for 3-song recommendations based on recent history, publishes to Kafka.  
+5. **UI**: Flask app that backfills & tails your history and recommendation topics, shows recent tracks & live recommendations in browser.
+
+---
+
+## Prerequisites
+
+- **Docker** & **docker-compose** (v1.27+ recommended)  
+- A valid **YouTube Music** `browser.json` auth file for `ytmusicapi`  
+- An **OpenAI API Key** with quota to call ChatGPT models  
+
+---
+
+## Setup & Configuration
+
+1. **Clone** this repository:  
+   ```bash
+   git clone https://github.com/your-username/ytm-stream-analytics.git
+   cd ytm-stream-analytics

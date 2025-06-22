@@ -23,6 +23,7 @@ A real-time data pipeline that reads your YouTube Music listening history, strea
 
 ## Architecture Overview
 
+```text
 YouTube Music Simulator
 ↓
 Kafka
@@ -34,3 +35,7 @@ Spark Streaming
 Recommender Service (OpenAI ChatGPT)
 ↓
 UI (Flask + SSE)
+
+```
+
+---

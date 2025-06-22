@@ -69,4 +69,20 @@ YouTube Music Simulator ──▶ Kafka (listening_events → listening_events_e
    
    simulator/browser.json
 
+---
 
+## Running the Pipeline
+
+**Build and start** all services:
+
+```
+docker-compose up --build
+```
+
+You should see logs indicating:
+
+   Simulator is polling and publishing new events
+   Kafka topics being created
+   Spark writing Parquet files under spark_output/
+   Recommender buffering events and calling ChatGPT
+   UI serving on http://localhost:5000

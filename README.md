@@ -118,3 +118,63 @@ You should see logs indicating:
 ---
 
 ## Directory Structure
+
+```text
+
+ytm-stream-analytics/
+├── .env
+├── docker-compose.yml
+├── Dockerfile.enricher       # Enricher service
+├── README.md
+│
+├── simulator/                # YouTube Music simulator + topic creation
+│   ├── browser.json
+│   ├── create_topic.py
+│   ├── Dockerfile.simulator
+│   ├── requirements.txt
+│   └── simulator.py
+│
+├── spark_streaming/          # Spark streaming job (writes Parquet)
+│   ├── schema.py
+│   └── stream_events.py
+│
+├── recommender/              # ChatGPT recommender service
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   └── run_recommend.py
+│
+└── ui/                       # Flask UI & SSE
+    ├── Dockerfile
+    ├── requirements.txt
+    ├── app.py
+    └── templates/index.html
+
+```
+
+---
+
+## Customization & Extending
+
+ - **Buffer size** for recommendations: adjust RECO_HISTORY_SIZE in .env or docker-compose.yml.
+ - **Model**: change model="gpt-4o-mini" in run_recommend.py.
+ - **Kafka topics**: override SOURCE_TOPIC, DEST_TOPIC, HISTORY_TOPIC, RECOMMENDATIONS_TOPIC as needed.
+ - **Spark output**: modify Parquet path or add additional aggregations in stream_events.py.
+
+---
+
+## Troubleshooting
+
+ - **Kafka topic not found**: make sure KAFKA_CREATE_TOPICS env in docker-compose.yml includes all three topics.
+ - **OpenAI 429 rate limit**: reduce consumption rate or add retry logic.
+ - **YouTube Music auth errors**: regenerate browser.json via setup_browser.py steps in simulator/.
+ - **Spark “NoClassDefFoundError”**: ensure the Kafka connector version (spark-sql-kafka-0-10_2.12) matches your Spark Scala version.
+
+---
+
+## Future Improvements
+
+ - **Feedback loop**: let UI capture which recommendations you “like” and refine future prompts.
+ - **Dashboard analytics**: use stored Parquet in a BI tool (e.g. Superset, Grafana).
+ - **Authentication**: secure the UI with basic auth.
+ - **Deployment**: swap Flask dev server for Gunicorn / Nginx.
+

@@ -1,0 +1,15 @@
+# Use the slim image that already has pip, no extra apt-gets needed
+FROM python:3.10-slim
+
+# Install only what we need in one layer
+WORKDIR /app
+COPY simulator/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy just the enricher script and its static config
+COPY simulator/enricher.py .
+COPY simulator/browser.json .
+
+# Make it easy to override the command if you ever want to run a different script
+ENTRYPOINT ["python", "enricher.py"]
+

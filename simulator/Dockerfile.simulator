@@ -1,0 +1,21 @@
+# Build context: ./simulator
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# 1) Copy only what we need for the simulator
+COPY requirements.txt   ./requirements.txt
+COPY simulator.py       ./simulator.py
+COPY create_topic.py    ./create_topic.py
+COPY browser.json       ./browser.json
+
+# 2) Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 3) Initialize state file (with safe perms for non-root user 50000)
+RUN echo '{"last_ts": null}' > state.json \
+ && chown 50000:0 state.json \
+ && chmod 600 state.json
+
+# 4) Run unbuffered so logs flush immediately
+CMD ["python", "-u", "simulator.py"]

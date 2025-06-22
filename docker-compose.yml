@@ -1,0 +1,134 @@
+networks:
+  default:
+
+services:
+
+  # ----------------------
+  # 1. Zookeeper & Kafka
+  # ----------------------
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    networks:
+      - default
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    restart: always
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    networks:
+      - default
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/9092"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"    # ensure broker will auto-create, or
+      KAFKA_CREATE_TOPICS: "listening_events:1:1,listening_events_enriched:1:1,song_recommendations:1:1"
+      KAFKA_LISTENERS:                    "PLAINTEXT://0.0.0.0:9092"
+      KAFKA_ADVERTISED_LISTENERS:         "PLAINTEXT://kafka:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME:   "PLAINTEXT"
+      KAFKA_ZOOKEEPER_CONNECT:            "zookeeper:2181"
+      KAFKA_AUTO_CREATE_TOPICS:           "true"
+      KAFKA_DELETE_TOPIC_ENABLE:          "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+
+  # ----------------------
+  # 2. Simulator
+  # ----------------------
+  simulator:
+    build:
+      context: ./simulator
+      dockerfile: Dockerfile.simulator
+    image: ytm-simulator:latest
+    environment:
+      PYTHONUNBUFFERED: "1"
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+      KAFKA_TOPIC: "listening_events"
+      SIMULATOR_FORCE_RESET: "false"
+    depends_on:
+        kafka:
+          condition: service_healthy
+
+  enricher:
+    image: ytm-enricher:latest
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+      SOURCE_TOPIC: "listening_events"
+      DEST_TOPIC:   "listening_events_enriched"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ----------------------
+  # 3. Spark
+  # ----------------------
+  spark:
+    image: bitnami/spark:3.3.4
+    container_name: spark
+    depends_on:
+      - kafka
+    volumes:
+      - ./spark_streaming:/opt/spark/app
+      - ./spark_output:/opt/spark/output
+      - ./spark_checkpoints:/opt/spark/checkpoints
+    command: >
+      /opt/bitnami/spark/bin/spark-submit
+      --master local[*]
+      --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.4
+      /opt/spark/app/stream_events.py
+
+  # ----------------------
+  # 4. Recommender Service
+  # ----------------------
+  recommender:
+    build:
+      context: ./recommender
+      dockerfile: Dockerfile
+    image: ytm-recommender:latest
+    env_file:
+      - ./.env
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+      SOURCE_TOPIC:           "listening_events_enriched"
+      DEST_TOPIC:             "song_recommendations"
+      RECO_HISTORY_SIZE:      "10"
+      OPENAI_API_KEY:         "${OPENAI_API_KEY}"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: "unless-stopped"
+
+  # ----------------------
+  # 5. UI
+  # ----------------------
+
+  ui:
+    build:
+      context: ui
+      dockerfile: Dockerfile
+    image: ytm-ui:latest
+    ports:
+      - "5000:5000"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS:  "kafka:9092"
+      HISTORY_TOPIC:           "listening_events"
+      RECOMMENDATIONS_TOPIC:   "song_recommendations"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - default
+    # restart: unless-stopped

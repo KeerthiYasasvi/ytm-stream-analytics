@@ -1,0 +1,4 @@
+pandas
+pyarrow          # for reading Parquet
+openai
+kafka-python    # for Kafka producer/consumer

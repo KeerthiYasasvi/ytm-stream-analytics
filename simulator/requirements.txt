@@ -1,0 +1,13 @@
+# ytmusicapi to fetch history & metadata
+ytmusicapi>=0.34.0
+
+# Kafka client
+kafka-python>=2.0.2
+
+# for state management (optional, but used for timestamps)
+python-dotenv==1.0.0
+
+# generic data handling (if you use pandas in your pipeline)
+pandas>=1.3.0
+
+# (remove delta-spark, dbt, airflow here—those belong in your other services)

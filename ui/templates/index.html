@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+  <head>
+    <title>YTM Dashboard</title>
+    <style>
+      /* ... your existing CSS ... */
+    </style>
+  </head>
+  <body>
+    <h1>Recent Tracks</h1>
+    <ul id="history"></ul>
+
+    <h1>Latest Recommendation</h1>
+    {% if latest_rec %}
+      <div class="rec">{{ latest_rec }}</div>
+    {% else %}
+      <div>No recommendations yet</div>
+    {% endif %}
+
+    <h1>Real-Time ChatGPT Recs</h1>
+    <ul id="recs"></ul>
+
+    <script>
+      // 1) Fetch the last 20 plays (API returns newest→oldest)
+      fetch("/api/history")
+        .then(r => r.json())
+        .then(data => {
+          const H = document.getElementById("history");
+          data.forEach(evt => {
+            const li = document.createElement("li");
+            li.textContent = `${evt.metadata.title} — ${evt.metadata.artist_name}`;
+            H.appendChild(li);
+          });
+        });
+
+      // 2) SSE for live rec batches
+      const es = new EventSource("/api/recommendations");
+      es.onmessage = e => {
+        const rec = JSON.parse(e.data);
+        const R = document.getElementById("recs");
+        const li = document.createElement("li");
+        li.className = "rec";
+        li.textContent = rec;        // rec is plain text
+        R.insertBefore(li, R.firstChild);
+      };
+    </script>
+  </body>
+</html>

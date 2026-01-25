@@ -1,0 +1,27 @@
+name: Support Bot Test (MAF)
+
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created]
+
+jobs:
+  run-support-bot:
+    runs-on: windows-latest
+    
+    permissions:
+      issues: write
+      contents: read
+    
+    steps:
+      - name: Run Support Bot via Action
+        uses: KeerthiYasasvi/ghithub-issues-bot-MAF@v0.1.0-test
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          openai-model: ${{ vars.OPENAI_MODEL || 'gpt-4o' }}
+          openai-critique-model: ${{ vars.OPENAI_CRITIQUE_MODEL || 'gpt-4o-mini' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dry-run: 'true'  # Set to 'false' after validating logs
+          write-mode: 'false'  # Set to 'true' to enable comment posting
+          spec-dir: '.supportbot'

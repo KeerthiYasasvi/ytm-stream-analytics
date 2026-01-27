@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          repository: KeerthiYasasvi/Github-issues-bot-with-MAF
+          repository: KeerthiYasasvi/github-issues-bot-MAF
           path: bot
           ref: main
 

@@ -17,14 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          repository: KeerthiYasasvi/github-issues-bot-MAF
-          path: bot
-          ref: main
-      
-      - name: Pull Latest Changes
-        run: |
-          cd bot
-          git pull origin main
+          submodules: recursive
  
       - name: Setup .NET
         uses: actions/setup-dotnet@v4

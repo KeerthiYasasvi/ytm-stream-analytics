@@ -20,7 +20,12 @@ jobs:
           repository: KeerthiYasasvi/github-issues-bot-MAF
           path: bot
           ref: main
-
+      
+      - name: Pull Latest Changes
+        run: |
+          cd bot
+          git pull origin main
+ 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:

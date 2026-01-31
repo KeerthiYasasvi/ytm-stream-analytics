@@ -109,7 +109,15 @@ $totalComments = 0
 $totalLoops = 0
 $totalTelemetryRuns = 0
 
-$tempRoot = Join-Path $env:TEMP ("bot-telemetry-" + [Guid]::NewGuid().ToString("N"))
+$tempBase = $env:RUNNER_TEMP
+if ([string]::IsNullOrWhiteSpace($tempBase)) {
+    $tempBase = $env:TEMP
+}
+if ([string]::IsNullOrWhiteSpace($tempBase)) {
+    $tempBase = "/tmp"
+}
+
+$tempRoot = Join-Path $tempBase ("bot-telemetry-" + [Guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
 
 foreach ($run in $runs) {

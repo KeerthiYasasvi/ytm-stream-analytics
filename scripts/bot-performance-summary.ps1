@@ -58,7 +58,7 @@ function Get-WorkflowRuns([string]$owner, [string]$repo, [string]$workflowFile, 
     return $runs
 }
 
-function Get-RunArtifacts([string]$owner, [string]$repo, [int]$runId) {
+function Get-RunArtifacts([string]$owner, [string]$repo, [long]$runId) {
     $url = "$baseUrl/repos/$owner/$repo/actions/runs/$runId/artifacts"
     $resp = Invoke-GitHubGet $url
     return $resp.artifacts
